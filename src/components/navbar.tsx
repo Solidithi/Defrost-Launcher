@@ -16,6 +16,7 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/solid";
 import { DollarCircleOutlined } from "@ant-design/icons";
+import { ConnectWallet } from "@thirdweb-dev/react";
 
 interface NavItemProps {
   children: React.ReactNode;
@@ -106,9 +107,7 @@ export function Navbar() {
           ))}
         </ul>
         <div className="hidden items-center gap-4 lg:flex">
-          <a href="" target="_blank">
-            <Button color={"white"}>Connect Wallet</Button>
-          </a>
+          <ConnectWallet/>
         </div>
         <IconButton
           variant="text"
