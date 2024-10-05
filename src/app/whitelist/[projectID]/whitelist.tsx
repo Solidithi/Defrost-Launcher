@@ -10,7 +10,7 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 export default function Whitelist({ projectID }: WhitelistProps) {
   // Social tasks states
   const [tasks, setTasks] = useState<SocialTask[]>([
-    { id: 'followTwitter', description: 'Follow our project on Twitter', verified: false },
+    { id: 'followX', description: 'Follow our project on X', verified: false },
     { id: 'retweetPost', description: 'Retweet our latest post on X', verified: false },
     { id: 'likeFacebook', description: 'Like our Facebook page', verified: false },
     { id: 'joinDiscord', description: 'Join our Discord server', verified: false },
@@ -49,16 +49,21 @@ export default function Whitelist({ projectID }: WhitelistProps) {
   const [isOTPTimedOut, setIsOTPTimedOut] = useState<boolean | null>(null);
   const [isSendingOTP, setIsSendingOTP] = useState<boolean>(false);
 
-  const checkEmailVerified = () => {
-    // const verifiedStatus = localStorage.getItem('emailVerified');
-    // const isVerified = verifiedStatus === 'true';
-
-    const isVerified = true;
-    setIsEmailVerified(isVerified);
-    // if (isVerified) {
-    //   localStorage.setItem('emailVerified', 'false');
-    // }
-  };
+  const checkEmailVerified = async () => {
+    try {
+      const response = await fetch(`/api/auth/email/verified?email=${email}`, {
+        method: 'GET',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch email verification status');
+      }
+      const data = await response.json();
+      setIsEmailVerified(data.verified === 'true');
+    } catch (error) {
+      console.error('Error checking email verification status:', error);
+      setIsEmailVerified(false);
+    }
+  }
 
   const handleVerifyEmailClick = () => {
     // validate input
@@ -85,7 +90,7 @@ export default function Whitelist({ projectID }: WhitelistProps) {
 
   const handleOTPSubmit = async (): Promise<boolean> => {
     if (!OTP) {
-      return false;;
+      return false;
     }
 
     setIsVerifying(true);
@@ -97,14 +102,21 @@ export default function Whitelist({ projectID }: WhitelistProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ OTP, email, projectID }),
+        body: JSON.stringify({ OTP, email }),
       });
 
       if (response.ok) {
         alert('OTP verified successfully!');
+        setOTP('');
+        setIsOTPTimedOut(null);
         setIsEmailVerified(true);
+        (document.getElementById("emailOTPModal") as HTMLDialogElement).close();
       } else {
         alert('OTP verification failed. Please try again.');
+        // setOTP('');
+        setIsVerifying(false);
+        // setIsOTPTimedOut(null);
+        (document.getElementById('emailOTPModal') as HTMLDialogElement).close()
       }
     } catch (error) {
       console.error('Error verifying OTP:', error);
@@ -117,26 +129,19 @@ export default function Whitelist({ projectID }: WhitelistProps) {
     return true;
   }
 
-  // check email verification status periodically
-  // useEffect(() => {
-  //   if (email) {
-  //     // 2 seconds delay b4 checking email verification status
-  //     const intervalId = setInterval(checkEmailVerified, 2000);
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, []);
-
-
   // check email verification status on page load
   useEffect(() => {
-    // Check immediately
-    checkEmailVerified();
+    const checkEmailStatus = async () => {
+      if (!email) {
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      await checkEmailVerified();
+    };
 
-    // Set up periodic checking
-    const intervalId = setInterval(checkEmailVerified, 2000); // Check every 2 seconds
+    checkEmailStatus(); // Call the async function
 
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [email]);
 
   const sendOTPViaEmail = async () => {
     try {
@@ -152,6 +157,7 @@ export default function Whitelist({ projectID }: WhitelistProps) {
         setIsOTPTimedOut(false);
       } else {
         alert('Failed to send OTP. Please try again.');
+        (document.getElementById("emailOTPModal") as HTMLDialogElement).close();
       }
     } catch (error) {
       console.error('Error sending OTP:', error);
@@ -162,9 +168,11 @@ export default function Whitelist({ projectID }: WhitelistProps) {
   };
 
   // function to display OTP TTL:
-  const OTPTimer = ({ minutes }: { minutes: number }) => {
+  /*
+  const OTPTimer = React.memo(({ minutes }: { minutes: number }) => {
     const [second, setSecond] = useState(0);
     const [minute, setMinute] = useState(minutes);
+
     useEffect(() => {
       const intervalID = setInterval(() => {
         if (second <= 0 && minute <= 0) {
@@ -180,7 +188,7 @@ export default function Whitelist({ projectID }: WhitelistProps) {
 
       }, 1000);
       return () => clearInterval(intervalID);
-    }, [second]);
+    }, [second, minute]); // Add minute to dependencies
 
     const formattedMinute = minute < 10 ? `0${minute}` : minute;
     const formattedSecond = second < 10 ? `0${second}` : second;
@@ -188,7 +196,8 @@ export default function Whitelist({ projectID }: WhitelistProps) {
     return (
       <p>OTP expires in: {formattedMinute}:{formattedSecond}</p>
     )
-  }
+  });
+  */
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl relative overflow-hidden">
@@ -199,7 +208,8 @@ export default function Whitelist({ projectID }: WhitelistProps) {
           <div className="relative z-10">
 
             <h1 className="text-2xl font-bold text-center mb-6 text-neutral-content">
-              WELCOME TO THE PROJECT WITH ID {projectID} WHITE LIST
+              PROJECT [NAME OF PROJECT] <br />
+              <span className="text-sm text-neutral-content/80">Whitelist Application</span>
             </h1>
             <p className="text-center mb-6">
               Fill in the form to be eligible for the whitelist
@@ -249,7 +259,7 @@ export default function Whitelist({ projectID }: WhitelistProps) {
                   <div id='modalContent' className="modal-box backdrop-blur-lg transition-all duration-300 bg-transparent">
                     <h3 className="font-bold text-lg">Email Verification</h3>
                     <p className='py-1 text-sm'>
-                      {isOTPTimedOut === true ? 'OTP timed out!' : <OTPTimer minutes={parseInt(process.env.NEXT_PUBLIC_OTP_TTL_MINUTES || '5')} />}
+                      {isOTPTimedOut === true ? 'OTP timed out!' : ''}
                     </p><br />
                     <p className="py-4">Enter the 6-digit OTP sent to your email:</p>
                     <form className="flex flex-col items-center">
