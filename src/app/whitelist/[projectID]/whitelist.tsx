@@ -306,11 +306,9 @@ export default function Whitelist({ projectID }: WhitelistProps) {
                     </form>
 
                     {/* Option to resend OTP after OTP has expired */}
-                    {isOTPTimedOut === true && (
-                      <p className='justify-between text-center py-4 text-sm'>Didn't receive OTP?
-                        <a onClick={handleResendOTP} className='font-bold hover:underline text-success cursor-pointer'> Resend OTP</a>
-                      </p>
-                    )}
+                    <p className='mt-4 justify-between text-center py-4 text-sm'>Didn't receive OTP?
+                      <a onClick={handleResendOTP} className='font-bold hover:underline text-success cursor-pointer'> Resend OTP</a>
+                    </p>
                     <div className="modal-action">
                       <form method="dialog">
                         <button className="btn">Close</button>
