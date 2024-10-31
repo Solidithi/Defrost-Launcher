@@ -37,11 +37,20 @@ function InvesmentPage() {
   const [redeemProject, setRedeemProject] = useState<DBProject | undefined>(
     undefined
   );
-  const [vAssetDecimals, setVAssetDecimals] = useState<number | undefined>(undefined);
-  const [projectTokenDecimals, setProjectTokenDecimals] = useState<number | undefined>(undefined);
-  const [isFetchingRedeemInfo, setIsFetchingRedeemInfo] = useState<boolean>(false);
-  const [userDepositAmount, setUserDepositAmount] = useState<string | undefined>(undefined);
-  const [withdrawAmount, setUserWithdrawAmount] = useState<string | undefined>(undefined);
+  const [vAssetDecimals, setVAssetDecimals] = useState<number | undefined>(
+    undefined
+  );
+  const [projectTokenDecimals, setProjectTokenDecimals] = useState<
+    number | undefined
+  >(undefined);
+  const [isFetchingRedeemInfo, setIsFetchingRedeemInfo] =
+    useState<boolean>(false);
+  const [userDepositAmount, setUserDepositAmount] = useState<
+    string | undefined
+  >(undefined);
+  const [withdrawAmount, setUserWithdrawAmount] = useState<string | undefined>(
+    undefined
+  );
   const [isFetchingProject, setIsFetchingProjects] = useState<boolean>(false);
 
   const showTxSuccessToast = async (duration?: number) => {
@@ -64,7 +73,6 @@ function InvesmentPage() {
     );
     setTxErrorToastVisible(false);
   };
-
 
   useEffect(() => {
     if (!chain) {
@@ -103,8 +111,10 @@ function InvesmentPage() {
           address: userAddress,
         });
 
-        let { investedProjects }: {
-          investedProjects: DBProject[]
+        let {
+          investedProjects,
+        }: {
+          investedProjects: DBProject[];
         } = response.data;
         console.log(investedProjects);
 
@@ -131,7 +141,7 @@ function InvesmentPage() {
             project.raisedAmount = raisedAmount.toString();
             project.rewardRate = rewardRate.toString();
             return project;
-          })
+          });
         }
 
         const ended = investedProjects.filter(
@@ -151,7 +161,6 @@ function InvesmentPage() {
     };
 
     fetchProjects();
-
   }, [userAddress, factoryContract]);
 
   useEffect(() => {
@@ -167,7 +176,9 @@ function InvesmentPage() {
 
     const fetchRedeemInfo = async () => {
       setIsFetchingRedeemInfo(true);
-      const poolAddress = await factoryContract.getProjectPoolAddress(redeemProject.projectID);
+      const poolAddress = await factoryContract.getProjectPoolAddress(
+        redeemProject.projectID
+      );
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const poolContract = new ethers.Contract(
         poolAddress,
@@ -192,7 +203,9 @@ function InvesmentPage() {
       setVAssetDecimals(Number(18));
       setProjectTokenDecimals(Number(18));
 
-      const _depositAmount: bigint = await poolContract.getUserDepositAmount(userAddress);
+      const _depositAmount: bigint = await poolContract.getUserDepositAmount(
+        userAddress
+      );
       const _withdrawAmount: bigint = await poolContract.getWithdrawAmount();
       console.log(`depositAmount is ${_depositAmount}`);
       console.log(`withdrawAmount is: ${_withdrawAmount}`);
@@ -205,7 +218,7 @@ function InvesmentPage() {
       // (document.getElementById("withdrawAmountInput") as HTMLInputElement).value = convertNumToOffchainFormat(BigInt(withdrawAmount), projectTokenDecimals!);
 
       setIsFetchingRedeemInfo(false);
-    }
+    };
 
     fetchRedeemInfo();
   }, [redeemProject, factoryContract]);
@@ -213,7 +226,7 @@ function InvesmentPage() {
   const handleRedeem = async (project: DBProject) => {
     setRedeemProject(project);
     (document.getElementById("redeemDialog") as HTMLDialogElement).showModal();
-  }
+  };
 
   const makeRedeemTransaction = async () => {
     if (!redeemProject) {
@@ -229,7 +242,9 @@ function InvesmentPage() {
     setIsCallingContract(true);
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const poolAddress = await factoryContract.getProjectPoolAddress(redeemProject.projectID!);
+    const poolAddress = await factoryContract.getProjectPoolAddress(
+      redeemProject.projectID!
+    );
     const poolContract = new ethers.Contract(
       poolAddress,
       ProjectPoolABI,
@@ -251,11 +266,11 @@ function InvesmentPage() {
     } finally {
       setIsCallingContract(false);
     }
-  }
+  };
 
   const handleRefund = async (project: DBProject) => {
     showAlertWithText("Coming soon!");
-  }
+  };
 
   const displayedEndedProjects = showMoreEnded
     ? endedProjects
@@ -281,42 +296,55 @@ function InvesmentPage() {
           </div>
         </div>
       </dialog>
-
       {/* Withdraw dialog (hidden by default) */}
-      <dialog
-        id="redeemDialog"
-        className="modal modal-bottom sm:modal-middle"
-      >
+      <dialog id="redeemDialog" className="modal modal-bottom sm:modal-middle">
         <div className="modal-box bg-primary text-primary-content">
           <h3 className="font-bold text-lg">Redeem purchased token</h3>
           {/* <p id="" className="py-4">{alertText}</p> */}
-          {isFetchingRedeemInfo ? <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>
-            : <div className="w-full flex-col mt-10 mb-10 p-4 gap-y-8">
+          {isFetchingRedeemInfo ? (
+            <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>
+          ) : (
+            <div className="w-full flex-col mt-10 mb-10 p-4 gap-y-8">
               <label className="form-control w-full mb-7">
                 <div className="label">
                   <span className="label-text">
                     <div className="flex flex-row gap-x-2">
                       {/* <img width={20} height={15} src='https://www.stakingrewards.com/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstakingrewards-static%2Fimages%2Fassets%2Fproduction%2Fbifrost-voucher-astr_logo.png%3Fv%3D1717150606436&w=3840&q=75'></img> */}
-                      <span className="font-bold text-cyan-300 mb-3 mx-auto my-auto">Voucher Asset deposited:</span>
+                      <span className="font-bold text-cyan-300 mb-3 mx-auto my-auto">
+                        Voucher Asset deposited:
+                      </span>
                     </div>
                   </span>
                 </div>
-                <input type="text" id="userDepositInput" value={userDepositAmount} placeholder="0" className="input input-bordered w-full max-w-xs bg-[#1d232a] shadow-lg" />
+                <input
+                  type="text"
+                  id="userDepositInput"
+                  value={userDepositAmount}
+                  placeholder="0"
+                  className="input input-bordered w-full max-w-xs bg-[#1d232a] shadow-lg"
+                />
               </label>
               <label className="form-control w-full">
                 <div className="label">
                   <span className="label-text">
                     <div className="flex flex-row gap-x-2 mx-auto my-auto">
                       {/* <img width={20} height={15} src='https://www.stakingrewards.com/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fstakingrewards-static%2Fimages%2Fassets%2Fproduction%2Fbifrost-voucher-astr_logo.png%3Fv%3D1717150606436&w=3840&q=75'></img> */}
-                      <span className="font-bold text-cyan-300 mb-3">Token receive:</span>
+                      <span className="font-bold text-cyan-300 mb-3">
+                        Token receive:
+                      </span>
                     </div>
                   </span>
                 </div>
-                <input type="text" id="withdrawAmountInput" value={withdrawAmount}
-                  placeholder="0" className="input input-bordered w-full max-w-xs bg-[#1d232a] shadow-lg" />
+                <input
+                  type="text"
+                  id="withdrawAmountInput"
+                  value={withdrawAmount}
+                  placeholder="0"
+                  className="input input-bordered w-full max-w-xs bg-[#1d232a] shadow-lg"
+                />
               </label>
             </div>
-          }
+          )}
           <div className="modal-action">
             <form method="dialog" className="gap-x-3">
               {/* if there is a button in form, it will close the modal */}
@@ -325,19 +353,24 @@ function InvesmentPage() {
                 className="btn btn-outline hover:text-black btn-success mx-auto my-auto"
                 onClick={(e) => {
                   e.preventDefault();
-                  makeRedeemTransaction()
+                  makeRedeemTransaction();
                 }}
               >
-                {isCallingContract ? <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span> : "Continue"}
+                {isCallingContract ? (
+                  <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>
+                ) : (
+                  "Continue"
+                )}
               </button>
             </form>
           </div>
         </div>
       </dialog>
-
-
       <div className="mt-20 mb-6 text-2xl font-bold text-white">
-        Ended Project {isFetchingProject && <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>}
+        Ended Project{" "}
+        {isFetchingProject && (
+          <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>
+        )}
       </div>
       {displayedEndedProjects.map((project) => (
         <div
@@ -374,39 +407,57 @@ function InvesmentPage() {
               </div>
               <div className="text-center">
                 <p className="font-semibold">Amount</p>
-                <p>{project.raisedAmount?.toString()}</p>
+                <p>
+                  {Number(
+                    convertNumToOffchainFormat(
+                      BigInt(project.raisedAmount!),
+                      18
+                    )
+                  )}
+                </p>
+                {/* <p>{project.raisedAmount?.toString()}</p> */}
               </div>
               <div className="ml-20 mx-auto my-auto text-center">
                 <p className="font-semibold">Reward</p>
-                <p className="text-cyan-300">+{Number(convertNumToOffchainFormat(BigInt(project.rewardRate!), 4))}%</p>
+                <p className="text-cyan-300">
+                  +
+                  {Number(
+                    convertNumToOffchainFormat(BigInt(project.rewardRate!), 4)
+                  )}
+                  %
+                </p>
               </div>
             </div>
           </div>
           <div className="ml-auto">
-            {
-              project.isProjectSoftcapReached ?
-                <button
-                  className="mr-4 rounded-lg btn btn-success"
-                  disabled={project.isRedeemed === true}
-                  onClick={(e) => { e.preventDefault(); handleRedeem(project) }}
-                >
-                  Redeem tokens
-                </button> :
-                <button
-                  className="mr-4 rounded-lg btn btn-ghost mx-auto my-auto px-4 py-2"
-                  onClick={(e) => {
-                    console.log(`IS PROJECT SOFTCAP REACHED AGAIN?: ${project.isProjectSoftcapReached}`);
-                    e.preventDefault();
-                    handleRefund(project)
-                  }}
-                >
-                  Refund tokens
-                </button>
-            }
+            {project.isProjectSoftcapReached ? (
+              <button
+                className="mr-4 rounded-lg btn btn-success"
+                disabled={project.isRedeemed === true}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleRedeem(project);
+                }}
+              >
+                Redeem tokens
+              </button>
+            ) : (
+              <button
+                className="mr-4 rounded-lg btn btn-ghost mx-auto my-auto px-4 py-2"
+                onClick={(e) => {
+                  console.log(
+                    `IS PROJECT SOFTCAP REACHED AGAIN?: ${project.isProjectSoftcapReached}`
+                  );
+                  e.preventDefault();
+                  handleRefund(project);
+                }}
+              >
+                Refund tokens
+              </button>
+            )}
           </div>
         </div>
       ))}
-
       <div className="mt-4 flex justify-center w-full">
         {!showMoreEnded ? (
           <Button
@@ -424,9 +475,11 @@ function InvesmentPage() {
           </Button>
         )}
       </div>
-
       <div className="mt-20 mb-6 text-2xl font-bold text-white">
-        Pending Project {isFetchingProject && <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>}
+        Pending Project{" "}
+        {isFetchingProject && (
+          <span className="loading loading-spinner display-block ml-3 loading-xs text-white mx-auto my-auto"></span>
+        )}
       </div>
       {displayedPendingProjects.map((project) => (
         <div
@@ -469,7 +522,6 @@ function InvesmentPage() {
           </div>
         </div>
       ))}
-
       <div className="mt-4 mb-4 flex justify-center w-full">
         {!showMorePending ? (
           <Button
@@ -487,14 +539,14 @@ function InvesmentPage() {
           </Button>
         )}
       </div>
-
       {/* hidden toasts (not shown unless called) */}
       <div className="toast toast-end">
         <div
           id="txSuccessToast"
           role="alert"
-          className={`alert alert-success ${txSuccessToastVisible ? "" : "hidden"
-            } `}
+          className={`alert alert-success ${
+            txSuccessToastVisible ? "" : "hidden"
+          } `}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -516,8 +568,9 @@ function InvesmentPage() {
         <div
           id="txErrorToast"
           role="alert"
-          className={`alert alert-error ${txErrorToastVisible ? "" : "hidden"
-            } `}
+          className={`alert alert-error ${
+            txErrorToastVisible ? "" : "hidden"
+          } `}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

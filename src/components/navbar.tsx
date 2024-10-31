@@ -66,17 +66,26 @@ export function Navbar({
     const checkProjectOwner = async () => {
       const owner = (await axios.post("/api/identity", { userAddress })).data;
       console.log(owner);
+
       if (owner) {
-        SET_NAV_MENU((prevMenu) => [
-          {
-            name: "My project",
-            icon: FireIcon,
-            href: "/myProject",
-          },
-          ...prevMenu,
-        ]);
+        SET_NAV_MENU((prevMenu) => {
+          const exists = prevMenu.some((item) => item.name === "My project");
+          if (!exists) {
+            return [
+              {
+                name: "My project",
+                icon: FireIcon,
+                href: "/myProject",
+              },
+              ...prevMenu,
+            ];
+          }
+
+          return prevMenu;
+        });
       }
     };
+
     checkProjectOwner();
   }, [userAddress]);
 
@@ -105,9 +114,10 @@ export function Navbar({
 
   return (
     <div
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${isScrolling ? "bg-[#0b162d] bg-opacity-100" : "bg-transparent"
-        }`}
-    // style={{ backgroundColor }}
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolling ? "bg-[#0b162d] bg-opacity-100" : "bg-transparent"
+      }`}
+      // style={{ backgroundColor }}
     >
       <div className="container mx-auto flex items-center justify-between py-2 ">
         <Link href="/" passHref>
