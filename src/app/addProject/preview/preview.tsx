@@ -300,11 +300,7 @@ const PreviewPage = () => {
       return;
     }
 
-    // if (PTDecimalsReadErr) {
-    //   showAlertWithText(`Failed to retrieve information about project token`);
-    //   console.error(PTDecimalsReadErr);
-    // }
-
+    console.trace(`VTDecimals is ${VTDecimals}`)
     console.trace(`VTDecimals is ${VTDecimals}`);
     console.debug(`factoryAddress is : ${factoryAddress}`);
     console.debug(`user address is :${userAddress}`);
@@ -380,7 +376,7 @@ const PreviewPage = () => {
       <div
         className="absolute top-0 left-0 w-full h-[720px] bg-cover bg-center blur-md"
         style={{
-          backgroundImage: `url(${images[0]})`,
+          backgroundImage: `url(${(images && images?.length > 0) ? images[0] : "https://www.hdwallpapers.in/download/dragon_dark_blue_background_4k_hd_horizon_forbidden_west-3840x2160.jpg"})`,
         }}
       ></div>
 
@@ -411,7 +407,7 @@ const PreviewPage = () => {
           <div className="lg:w-2/3 p-6 flex flex-col justify-center">
             <div className="relative mb-4 h-96" onClick={toggleFullscreen}>
               <Image
-                src={images[currentImage]}
+                src={(images && images?.length > currentImage) ? images[currentImage] : ""}
                 alt="Main Image"
                 width={600}
                 height={400}
@@ -440,7 +436,7 @@ const PreviewPage = () => {
             </div>
 
             <div className="flex space-x-4">
-              {images.map((image: string, index: number) => (
+              {images && images.map((image: string, index: number) => (
                 <Image
                   key={index}
                   src={image}
@@ -580,16 +576,14 @@ const PreviewPage = () => {
           disabled={isCallingCreateProject === true || txHashWatching !== null}
           onClick={handleSubmit}
         >
-          {txHashWatching !== null ||
-            isCallingCreateProject === true ||
-            isSendingHTTPRequest === true ? (
-            <span className="loading loading-dots loading-md"></span>
-          ) : (
-            "verify"
-          )}
-        </Button >
-      </div >
-    </div >
+          {(txHashWatching !== null
+            || isCallingCreateProject === true
+            || isSendingHTTPRequest === true)
+            ? <span className="loading loading-dots loading-md"></span>
+            : "Continue"}
+        </Button>
+      </div>
+    </div>
   );
 };
 

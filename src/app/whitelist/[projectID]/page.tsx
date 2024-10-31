@@ -14,19 +14,18 @@ import {
   useContractRead,
   useContractWrite,
 } from "@thirdweb-dev/react";
-import { getProjectPoolContract, getVTokenContract } from "@/utils/contracts";
-import { Footer, Navbar } from "@/components";
-export default function Whitelist({
-  params,
-}: {
-  params: { projectID: string };
-}) {
+import {
+  useGetProjectPoolContract,
+  useGetVTokenContract
+} from "@/utils/contracts";
+
+export default function Whitelist({ params }: { params: { projectID: string } }) {
   // Wallet-related states
   const router = useRouter();
   const address = useAddress();
   const projectID = params.projectID;
-  const poolContract = getProjectPoolContract(projectID);
-  const vTokenContract = getVTokenContract(poolContract!);
+  const poolContract = useGetProjectPoolContract(projectID);
+  const vTokenContract = useGetVTokenContract(poolContract!);
 
   const {
     mutateAsync: callJoinWhitelilst,
@@ -282,7 +281,7 @@ export default function Whitelist({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ OTP, email, address }),
+        body: JSON.stringify({ OTP, email, address, }),
       });
 
       if (response.ok) {
