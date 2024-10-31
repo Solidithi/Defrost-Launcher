@@ -6,12 +6,17 @@ import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { useChain } from "@thirdweb-dev/react";
+import { useChain, useContract, useContractRead } from "@thirdweb-dev/react";
 import { chainConfig } from "@/config";
 import { ethers } from "ethers";
 import { ProjectPoolABI, ProjectPoolFactoryABI } from "@/abi";
 import { DBProject, DBLaunchpad } from "@/interfaces/interface";
 import { log } from "console";
+import {
+  convertNumToOffchainFormat,
+  convertNumToOnChainFormat,
+} from "@/utils/decimals";
+import { useSelector } from "react-redux";
 
 function LaunchpadPage() {
   const [projectList, setProjectList] = useState([]);
@@ -90,11 +95,20 @@ function LaunchpadPage() {
           const isProjectSoftCapReached =
             await contract.getProjectSoftCapReached();
           const hardCap = await contract.getProjectHardCapAmount();
+          const decimal = await contract.RATE_DECIMALS();
+          console.log("hardcap: " + hardCap);
+
+          console.log(
+            "hardcap after format" +
+              Number(convertNumToOffchainFormat(BigInt(hardCap), 18))
+          );
+
           projectsWithDetails.push(
             Object.assign(project, {
               raisedAmount,
               isProjectSoftCapReached,
               hardCap,
+              decimal,
             })
           );
         }
@@ -170,7 +184,12 @@ function LaunchpadPage() {
                     <p className="mt-4">
                       Fundraise Goal:
                       <span className="font-bold">
-                        {project.hardCap?.toString()}
+                        {Number(
+                          convertNumToOffchainFormat(
+                            BigInt(project.hardCap!),
+                            18
+                          )
+                        )}
                       </span>
                     </p>
                   </div>
@@ -220,7 +239,7 @@ function LaunchpadPage() {
             <thead>
               <tr className="bg-[#27272A] text-left text-sm text-[#aeaeae]">
                 <th className="p-4">Project Name</th>
-                <th className="p-4">Type</th>
+                <th className="p-4">Short Description</th>
                 <th className="p-4">Raised Fund</th>
                 <th className="p-4">End Date</th>
               </tr>
@@ -236,7 +255,7 @@ function LaunchpadPage() {
                   }}
                 >
                   <td className="p-4">{project.projectTitle}</td>
-                  <td className="p-4">{project.description}</td>
+                  <td className="p-4">{project.shortDescription}</td>
                   <td className="p-4">{project.raisedAmount?.toString()}</td>
                   <td className="p-4">
                     {new Date(project.endDate).toLocaleDateString()}
